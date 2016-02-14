@@ -19,17 +19,20 @@
     
 @private float cur_light;
 @private float steps;
+@private float time;
+@private float time_interval;
 @private BOOL light_ready;
 @private BOOL isSleeping;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    time_interval = 0.01;
     // Do any additional setup after loading the view, typically from a nib.
     self.motionManager = [[CMMotionManager alloc] init];
-    self.motionManager.magnetometerUpdateInterval = 0.01;
-    self.motionManager.accelerometerUpdateInterval = 0.01;
-    self.motionManager.gyroUpdateInterval = 0.01;
+    self.motionManager.magnetometerUpdateInterval = time_interval;
+    self.motionManager.accelerometerUpdateInterval = time_interval;
+    self.motionManager.gyroUpdateInterval = time_interval;
     [self.motionManager startMagnetometerUpdates ];
     [self.motionManager startAccelerometerUpdates];
     [self.motionManager startGyroUpdates];
@@ -104,8 +107,9 @@
         
         self->light_ready = NO;
         //float timestamp = (float)(NSTimeInterval)[[NSDate date] timeIntervalSince1970];
-        NSString* timestamp = [NSString stringWithFormat:@"%f",(NSTimeInterval)[[NSDate date] timeIntervalSince1970]];
-        NSString *csv_line = [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%@\n", self.motionManager.magnetometerData.magneticField.x, self.motionManager.magnetometerData.magneticField.y, self.motionManager.magnetometerData.magneticField.z, self.motionManager.gyroData.rotationRate.x, self.motionManager.gyroData.rotationRate.y, self.motionManager.gyroData.rotationRate.z, self.motionManager.accelerometerData.acceleration.x, self.motionManager.accelerometerData.acceleration.y, self.motionManager.accelerometerData.acceleration.z, self->cur_light, timestamp];
+        //NSString* timestamp = [NSString stringWithFormat:@"%f",(NSTimeInterval)[[NSDate date] timeIntervalSince1970]];
+        time += time_interval;
+        NSString *csv_line = [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%.2f\n", self.motionManager.magnetometerData.magneticField.x, self.motionManager.magnetometerData.magneticField.y, self.motionManager.magnetometerData.magneticField.z, self.motionManager.gyroData.rotationRate.x, self.motionManager.gyroData.rotationRate.y, self.motionManager.gyroData.rotationRate.z, self.motionManager.accelerometerData.acceleration.x, self.motionManager.accelerometerData.acceleration.y, self.motionManager.accelerometerData.acceleration.z, self->cur_light, time];
         NSData *data = [[NSData alloc] initWithData:[csv_line dataUsingEncoding:NSASCIIStringEncoding]];
         [self.outputStream write:[data bytes] maxLength:[data length]];
         NSLog(csv_line);
@@ -115,8 +119,9 @@
 - (IBAction)handleClick:(id)sender {
     if (!self->running){
         steps = 0;
+        time = 0;
         self.stepsLabel.text = @"0";
-        self.motionTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(checkMotionData) userInfo:nil repeats:YES];
+        self.motionTimer = [NSTimer scheduledTimerWithTimeInterval:time_interval target:self selector:@selector(checkMotionData) userInfo:nil repeats:YES];
         [[NSRunLoop mainRunLoop] addTimer:self.motionTimer forMode:NSRunLoopCommonModes];
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
@@ -145,7 +150,7 @@
 dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
     //Background Thread
     dispatch_async(dispatch_get_main_queue(), ^(void){
-                float xx = self.motionManager.accelerometerData.acceleration.x;
+        float xx = self.motionManager.accelerometerData.acceleration.x;
         float yy = self.motionManager.accelerometerData.acceleration.y;
         float zz = self.motionManager.accelerometerData.acceleration.z;
         
