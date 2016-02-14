@@ -27,7 +27,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    time_interval = 0.01;
+    time_interval = 0.005;
     // Do any additional setup after loading the view, typically from a nib.
     self.motionManager = [[CMMotionManager alloc] init];
     self.motionManager.magnetometerUpdateInterval = time_interval;
@@ -103,13 +103,13 @@
 }
 
 - (void) checkMotionData {
-    if (self.motionManager.magnetometerData != nil && self.motionManager.gyroData != nil && self.motionManager.accelerometerData != nil && self->light_ready){
+    time += time_interval;
+    if (self.motionManager.magnetometerData != nil && self.motionManager.gyroData != nil && self.motionManager.accelerometerData != nil) { //&& self->light_ready){
         
         self->light_ready = NO;
         //float timestamp = (float)(NSTimeInterval)[[NSDate date] timeIntervalSince1970];
         //NSString* timestamp = [NSString stringWithFormat:@"%f",(NSTimeInterval)[[NSDate date] timeIntervalSince1970]];
-        time += time_interval;
-        NSString *csv_line = [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%.2f\n", self.motionManager.magnetometerData.magneticField.x, self.motionManager.magnetometerData.magneticField.y, self.motionManager.magnetometerData.magneticField.z, self.motionManager.gyroData.rotationRate.x, self.motionManager.gyroData.rotationRate.y, self.motionManager.gyroData.rotationRate.z, self.motionManager.accelerometerData.acceleration.x, self.motionManager.accelerometerData.acceleration.y, self.motionManager.accelerometerData.acceleration.z, self->cur_light, time];
+        NSString *csv_line = [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%.3f\n", self.motionManager.magnetometerData.magneticField.x, self.motionManager.magnetometerData.magneticField.y, self.motionManager.magnetometerData.magneticField.z, self.motionManager.gyroData.rotationRate.x, self.motionManager.gyroData.rotationRate.y, self.motionManager.gyroData.rotationRate.z, self.motionManager.accelerometerData.acceleration.x, self.motionManager.accelerometerData.acceleration.y, self.motionManager.accelerometerData.acceleration.z, self->cur_light, time];
         NSData *data = [[NSData alloc] initWithData:[csv_line dataUsingEncoding:NSASCIIStringEncoding]];
         [self.outputStream write:[data bytes] maxLength:[data length]];
         NSLog(csv_line);
