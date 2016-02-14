@@ -13,9 +13,14 @@
 
 @implementation ViewController {
 @private BOOL running;
+@private float px;
+@private float py;
+@private float pz;
     
 @private float cur_light;
+@private float steps;
 @private BOOL light_ready;
+@private BOOL isSleeping;
 }
 
 - (void)viewDidLoad {
@@ -31,11 +36,26 @@
     self->running = FALSE;
     
     self.session = [[AVCaptureSession alloc] init];
-    AVCaptureDevice * camera = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
+    //AVCaptureDevice * captureDevices = AVCaptureDevice.devices();
+    AVCaptureDevice * camera = nil;
+    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    for(AVCaptureDevice *device in devices) {
+        if([device position] == AVCaptureDevicePositionFront) { // is front camera
+            camera = device;
+            break;
+        }
+    }
+    px = py = pz = 0;
+    self.stepsLabel.text = @"0";
+    
+    self.motionTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(countSteps) userInfo:nil repeats:YES];
+
+    
+    //AVCaptureDevice * camera = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
     NSError *error = nil;
     AVCaptureDeviceInput * videoinput = [AVCaptureDeviceInput deviceInputWithDevice:camera error:&error];
     if ([camera lockForConfiguration:&error]) {
-        [camera setExposureMode: AVCaptureExposureModeAutoExpose];
+        [camera setExposureMode: AVCaptureExposureModeLocked];
         [camera unlockForConfiguration];
     }
     else {
@@ -53,6 +73,7 @@
     [self.session startRunning];
     
     //[self.motionManager startMagnetometerUpdatesToQueue: [NSOperationQueue currentQueue] withHandler:^(CMMagnetometerData *data, NSError *error) {self.magneticLabel.text = [NSString stringWithFormat:@"%.02f", data.magneticField.x]; }];
+
 }
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
@@ -80,12 +101,11 @@
 
 - (void) checkMotionData {
     if (self.motionManager.magnetometerData != nil && self.motionManager.gyroData != nil && self.motionManager.accelerometerData != nil && self->light_ready){
-        self.magneticLabel = [NSString stringWithFormat:@"%f", self->cur_light];
-        
         
         self->light_ready = NO;
-        NSString * timestamp = [NSString stringWithFormat:@"%f",[[NSDate date] timeIntervalSince1970]];
-        NSString *csv_line = [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f,%@\n", self.motionManager.magnetometerData.magneticField.x, self.motionManager.magnetometerData.magneticField.y, self.motionManager.magnetometerData.magneticField.z, self.motionManager.gyroData.rotationRate.x, self.motionManager.gyroData.rotationRate.y, self.motionManager.gyroData.rotationRate.z, self.motionManager.accelerometerData.acceleration.x, self.motionManager.accelerometerData.acceleration.y, self.motionManager.accelerometerData.acceleration.z, timestamp];
+        //float timestamp = (float)(NSTimeInterval)[[NSDate date] timeIntervalSince1970];
+        NSString* timestamp = [NSString stringWithFormat:@"%f",(NSTimeInterval)[[NSDate date] timeIntervalSince1970]];
+        NSString *csv_line = [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%@\n", self.motionManager.magnetometerData.magneticField.x, self.motionManager.magnetometerData.magneticField.y, self.motionManager.magnetometerData.magneticField.z, self.motionManager.gyroData.rotationRate.x, self.motionManager.gyroData.rotationRate.y, self.motionManager.gyroData.rotationRate.z, self.motionManager.accelerometerData.acceleration.x, self.motionManager.accelerometerData.acceleration.y, self.motionManager.accelerometerData.acceleration.z, self->cur_light, timestamp];
         NSData *data = [[NSData alloc] initWithData:[csv_line dataUsingEncoding:NSASCIIStringEncoding]];
         [self.outputStream write:[data bytes] maxLength:[data length]];
         NSLog(csv_line);
@@ -94,15 +114,22 @@
 }
 - (IBAction)handleClick:(id)sender {
     if (!self->running){
-        self.motionTimer = [NSTimer scheduledTimerWithTimeInterval:0.002 target:self selector:@selector(checkMotionData) userInfo:nil repeats:YES];
+        steps = 0;
+        self.stepsLabel.text = @"0";
+        self.motionTimer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(checkMotionData) userInfo:nil repeats:YES];
         [[NSRunLoop mainRunLoop] addTimer:self.motionTimer forMode:NSRunLoopCommonModes];
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
-        NSString *filePath = [documentsPath stringByAppendingPathComponent:@"data.csv"];
+        NSString * filename = [NSString stringWithFormat:@"LABEL_%f.csv",(float)(NSTimeInterval)[[NSDate date] timeIntervalSince1970]];
+        NSString *filePath = [documentsPath stringByAppendingPathComponent:filename];
         NSLog(@"%@",filePath);
         self.outputStream = [[NSOutputStream alloc] initToFileAtPath:filePath append:YES];
         [self.outputStream open];
         self->running = TRUE;
+        //NSString *csv_line = @"MagX, MagY, MagZ, GyroX, GyroY, GyroZ, AccelX, AccelY, AccelZ, Lum, Time\n";
+        //NSData *data = [[NSData alloc] initWithData:[csv_line dataUsingEncoding:NSASCIIStringEncoding]];
+        //[self.outputStream write:[data bytes] maxLength:[data length]];
+
         [self.handleClick setTitle: @"Stop" forState:UIControlStateNormal];
     }
     else {
@@ -114,8 +141,41 @@
     }
     
 }
+- (void) countSteps {
+dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+    //Background Thread
+    dispatch_async(dispatch_get_main_queue(), ^(void){
+                float xx = self.motionManager.accelerometerData.acceleration.x;
+        float yy = self.motionManager.accelerometerData.acceleration.y;
+        float zz = self.motionManager.accelerometerData.acceleration.z;
+        
+        float dot = (px * xx) + (py * yy) + (pz * zz);
+        float a = ABS(sqrt(px * px + py * py + pz * pz));
+        float b = ABS(sqrt(xx * xx + yy * yy + zz * zz));
+        
+        dot /= (a * b);
+        self.pythLabel.text = [NSString stringWithFormat:@"%f", dot];
+        
+        if (dot <= 0.98) {
+            //isSleeping = YES;
+            //[self performSelector:@selector(wakeUp) withObject:nil afterDelay:1.5];
+            steps = steps + 1;
+            //steps++;
+            self.stepsLabel.text = [NSString stringWithFormat:@"%d", (int)(steps)];
+        }
+        
+        px = xx;
+        py = yy;
+        pz = zz;
+        //Run UI Updates
+        self.magneticLabel.text = [NSString stringWithFormat:@"%f", self->cur_light];
+    });
+});
+}
 
-
+- (void)wakeUp {
+    isSleeping = NO;
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

@@ -15,10 +15,13 @@
 
 @interface ViewController : UIViewController
 @property (weak, nonatomic) IBOutlet UILabel *magneticLabel;
+@property (weak, nonatomic) IBOutlet UILabel *stepsLabel;
+@property (weak, nonatomic) IBOutlet UILabel *pythLabel;
 @property (weak, nonatomic) IBOutlet UIButton *handleClick;
 @property (strong, nonatomic) CMMotionManager * motionManager;
 @property (strong, nonatomic) AVCaptureSession * session;
 @property (weak, nonatomic) NSTimer * motionTimer;
+@property (weak, nonatomic) NSTimer * stepsTimer;
 @property (strong, nonatomic) NSOutputStream * outputStream;
 @end
 

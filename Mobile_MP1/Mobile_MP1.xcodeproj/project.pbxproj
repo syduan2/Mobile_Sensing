@@ -16,7 +16,6 @@
 		A3B73A051C670C6A007FF932 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A3B73A031C670C6A007FF932 /* LaunchScreen.storyboard */; };
 		A3B73A101C670C6A007FF932 /* Mobile_MP1Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3B73A0F1C670C6A007FF932 /* Mobile_MP1Tests.m */; };
 		A3B73A1B1C670C6A007FF932 /* Mobile_MP1UITests.m in Sources */ = {isa = PBXBuildFile; fileRef = A3B73A1A1C670C6A007FF932 /* Mobile_MP1UITests.m */; };
-		A3B73A2B1C685470007FF932 /* Ameren.Mobile-MP1 2016-02-07 21:00.51.587.xcappdata in Resources */ = {isa = PBXBuildFile; fileRef = A3B73A2A1C685470007FF932 /* Ameren.Mobile-MP1 2016-02-07 21:00.51.587.xcappdata */; };
 		A3B73A2D1C69151D007FF932 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3B73A2C1C69151D007FF932 /* AVFoundation.framework */; };
 		A3B73A2F1C692420007FF932 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3B73A2E1C692420007FF932 /* CoreVideo.framework */; };
 /* End PBXBuildFile section */
@@ -57,7 +56,6 @@
 		A3B73A1A1C670C6A007FF932 /* Mobile_MP1UITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Mobile_MP1UITests.m; sourceTree = "<group>"; };
 		A3B73A1C1C670C6A007FF932 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A3B73A281C670FDC007FF932 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		A3B73A2A1C685470007FF932 /* Ameren.Mobile-MP1 2016-02-07 21:00.51.587.xcappdata */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "Ameren.Mobile-MP1 2016-02-07 21:00.51.587.xcappdata"; path = "../../../Downloads/Ameren.Mobile-MP1 2016-02-07 21:00.51.587.xcappdata"; sourceTree = "<group>"; };
 		A3B73A2C1C69151D007FF932 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A3B73A2E1C692420007FF932 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -94,7 +92,6 @@
 			children = (
 				A3B73A2E1C692420007FF932 /* CoreVideo.framework */,
 				A3B73A2C1C69151D007FF932 /* AVFoundation.framework */,
-				A3B73A2A1C685470007FF932 /* Ameren.Mobile-MP1 2016-02-07 21:00.51.587.xcappdata */,
 				A3B73A281C670FDC007FF932 /* CoreLocation.framework */,
 				A3B739F11C670C6A007FF932 /* Mobile_MP1 */,
 				A3B73A0E1C670C6A007FF932 /* Mobile_MP1Tests */,
@@ -223,7 +220,7 @@
 				TargetAttributes = {
 					A3B739EE1C670C6A007FF932 = {
 						CreatedOnToolsVersion = 7.2.1;
-						DevelopmentTeam = V2467H8M43;
+						DevelopmentTeam = NXJ6X9B28E;
 					};
 					A3B73A0A1C670C6A007FF932 = {
 						CreatedOnToolsVersion = 7.2.1;
@@ -263,7 +260,6 @@
 				A3B73A051C670C6A007FF932 /* LaunchScreen.storyboard in Resources */,
 				A3B73A021C670C6A007FF932 /* Assets.xcassets in Resources */,
 				A3B739FD1C670C6A007FF932 /* Main.storyboard in Resources */,
-				A3B73A2B1C685470007FF932 /* Ameren.Mobile-MP1 2016-02-07 21:00.51.587.xcappdata in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,7 +432,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Mobile_MP1/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "Ameren.Mobile-MP1";
+				PRODUCT_BUNDLE_IDENTIFIER = "mobilecomputing.Mobile-MP1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};
@@ -450,7 +446,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Mobile_MP1/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "Ameren.Mobile-MP1";
+				PRODUCT_BUNDLE_IDENTIFIER = "mobilecomputing.Mobile-MP1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};
