@@ -23,5 +23,6 @@
 @property (weak, nonatomic) NSTimer * motionTimer;
 @property (weak, nonatomic) NSTimer * stepsTimer;
 @property (strong, nonatomic) NSOutputStream * outputStream;
+
 @end
 
