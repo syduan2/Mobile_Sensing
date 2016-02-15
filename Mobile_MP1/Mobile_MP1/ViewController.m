@@ -168,14 +168,14 @@ dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
         float curr_y = self.motionManager.accelerometerData.acceleration.y;
         float curr_z = self.motionManager.accelerometerData.acceleration.z;
         
-        float threshold = (prev_x * curr_x) + (prev_y * curr_y) + (prev_z * curr_z);
+        //float threshold = (prev_x * curr_x) + (prev_y * curr_y) + (prev_z * curr_z);
         float prev = ABS(sqrt(prev_x * prev_x + prev_y * prev_y + prev_z * prev_z));
         float curr = ABS(sqrt(curr_x * curr_x + curr_y * curr_y + curr_z * curr_z));
         
-        threshold /= (prev * curr);
+        float threshold = time_interval * curr + (1.0 - time_interval) * prev;
         self.pythLabel.text = [NSString stringWithFormat:@"%f", threshold];
         
-        if (threshold <= 0.93) {
+        if (threshold <= 0.80) {
             //isSleeping = YES;
             //[self performSelector:@selector(wakeUp) withObject:nil afterDelay:1.5];
             newsteps = steps + 1;
