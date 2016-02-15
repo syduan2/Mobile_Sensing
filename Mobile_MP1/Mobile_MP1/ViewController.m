@@ -16,12 +16,13 @@
 @private float prev_x;
 @private float prev_y;
 @private float prev_z;
+@private NSString * filename;
     
 @private float cur_light;
 @private int newsteps;
 @private float steps;
-@private double origstamp;
-@private double time;
+//@private double origstamp;
+@private int time;
 @private double time_interval;
 
 @private BOOL light_ready;
@@ -30,7 +31,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    time_interval = 0.05;
+    time_interval = 0.01;
     // Do any additional setup after loading the view, typically from a nib.
     self.motionManager = [[CMMotionManager alloc] init];
     self.motionManager.magnetometerUpdateInterval = time_interval;
@@ -114,9 +115,9 @@
     if (self.motionManager.magnetometerData != nil && self.motionManager.gyroData != nil && self.motionManager.accelerometerData != nil) { //&& self->light_ready){
         
         self->light_ready = NO;
-    
-        NSString* timestamp = [NSString stringWithFormat:@"%f",((NSTimeInterval)[[NSDate date] timeIntervalSince1970] * 1000) - origstamp];
-        NSString *csv_line = [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f,%g,%@\n", self.motionManager.magnetometerData.magneticField.x, self.motionManager.magnetometerData.magneticField.y, self.motionManager.magnetometerData.magneticField.z, self.motionManager.gyroData.rotationRate.x, self.motionManager.gyroData.rotationRate.y, self.motionManager.gyroData.rotationRate.z, self.motionManager.accelerometerData.acceleration.x, self.motionManager.accelerometerData.acceleration.y, self.motionManager.accelerometerData.acceleration.z, self->cur_light, timestamp];
+        time++;
+        //NSString* timestamp = [NSString stringWithFormat:@"%f",((NSTimeInterval)[[NSDate date] timeIntervalSince1970] * 1000) - origstamp];
+        NSString *csv_line = [NSString stringWithFormat:@"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d\n", self.motionManager.magnetometerData.magneticField.x, self.motionManager.magnetometerData.magneticField.y, self.motionManager.magnetometerData.magneticField.z, self.motionManager.gyroData.rotationRate.x, self.motionManager.gyroData.rotationRate.y, self.motionManager.gyroData.rotationRate.z, self.motionManager.accelerometerData.acceleration.x, self.motionManager.accelerometerData.acceleration.y, self.motionManager.accelerometerData.acceleration.z, self->cur_light, time];
         NSData *data = [[NSData alloc] initWithData:[csv_line dataUsingEncoding:NSASCIIStringEncoding]];
         [self.outputStream write:[data bytes] maxLength:[data length]];
         NSLog(csv_line);
@@ -132,12 +133,12 @@
         self->newsteps = 0;
         self->time = 0;
         self.stepsLabel.text = @"0";
-        self->origstamp = ((NSTimeInterval)[[NSDate date] timeIntervalSince1970] * 1000);
+        //self->origstamp = ((NSTimeInterval)[[NSDate date] timeIntervalSince1970] * 1000);
         self.motionTimer = [NSTimer scheduledTimerWithTimeInterval:time_interval target:self selector:@selector(checkMotionData) userInfo:nil repeats:YES];
         [[NSRunLoop mainRunLoop] addTimer:self.motionTimer forMode:NSRunLoopCommonModes];
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
-        NSString * filename = [NSString stringWithFormat:@"LABEL_%f.csv",(float)(NSTimeInterval)[[NSDate date] timeIntervalSince1970]];
+        NSString * filename = [NSString stringWithFormat:@"newLABEL_%f.csv",(float)(NSTimeInterval)[[NSDate date] timeIntervalSince1970]];
         NSString *filePath = [documentsPath stringByAppendingPathComponent:filename];
         NSLog(@"%@",filePath);
         self.outputStream = [[NSOutputStream alloc] initToFileAtPath:filePath append:YES];
@@ -153,6 +154,7 @@
         [self.motionTimer invalidate];
         [self.motionManager stopDeviceMotionUpdates];
         self->running = FALSE;
+        self->filename = @" ";
         [self.handleClick setTitle: @"Start" forState:UIControlStateNormal];
         [self.outputStream close];
     }
