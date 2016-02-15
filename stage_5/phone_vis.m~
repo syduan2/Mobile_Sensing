@@ -25,16 +25,16 @@ while(1)
     a1 = [a1, a(1)];
     a2 = [a2, a(2)];
     a3 = [a3, a(3)];
-    if (i > 50) 
-        a1 = a1(end-49: end);
-        a2 = a2(end-49: end);
-        a3 = a3(end-49: end);
-        b1 = a1(end-49: end);
-        b2 = a2(end-49: end);
-        b3 = a3(end-49: end);
-        c1 = a1(end-49: end);
-        c2 = a2(end-49: end);
-        c3 = a3(end-49: end);
+    if (i > 100) 
+        a1 = a1(end-99: end);
+        a2 = a2(end-99: end);
+        a3 = a3(end-99: end);
+        b1 = a1(end-99: end);
+        b2 = a2(end-99: end);
+        b3 = a3(end-99: end);
+        c1 = a1(end-99: end);
+        c2 = a2(end-99: end);
+        c3 = a3(end-99: end);
     end
     
     b1 = [b1, b(1)];
@@ -55,12 +55,10 @@ while(1)
         c3 = c3(end-199: end);
     end
     
-    subplot(1,2,2);
-    scatter3(a1,a2,a3);
-    subplot(1,2,1);
-    a1_spec = abs(fft(a1)) .^ 2;
-    plot(a1_spec)
     
+    hold off;
+    clf(
+    scatter3(a1,a2,a3)
     %{
     subplot(3,1,2);
     hold on;
