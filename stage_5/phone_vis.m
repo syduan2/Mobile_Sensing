@@ -16,6 +16,11 @@ c3 = [];
 i = 0;
 figure
 pause(1);
+x = [];
+y = [];
+z = [];
+mag = [];
+step_counter = 0;
 while(1)
     i = i + 1;
     a = mb_dev.Acceleration;
@@ -54,25 +59,28 @@ while(1)
         c2 = c2(end-199: end);
         c3 = c3(end-199: end);
     end
-    
-    subplot(1,2,2);
+       
+    subplot(1,3,2);
     scatter3(a1,a2,a3);
-    subplot(1,2,1);
+    title('Acceleration 3d plot');
+    subplot(1,3,1);
     a1_spec = abs(fft(a1)) .^ 2;
     plot(a1_spec)
+    title('Spectral graph');
     
-    %{
-    subplot(3,1,2);
-    hold on;
-    plot(b1, 'color', 'r')
-    plot(b2, 'color', 'b')
-    plot(b3, 'color', 'g')
-    subplot(3,1,3);
-    hold on;
-    plot(c1, 'color', 'r')
-    plot(c2, 'color', 'b')
-    plot(c3, 'color', 'g')
-    %}
+    x = [x,var(a3)];
+    y = [y,mean(a2)];
+    z = [z,var(c3)];
+    subplot(1,3,3);
+    scatter3(x,y,z);
+    title('Stage 4 Graph');
+    
+    if (i > 1)
+        mag = (a(1)^2 + a(2)^2 + a(3)^2)^.5 + (a1(end-1)^2 + a2(end-1)^2  + a3(end-1)^2)^.5;
+        if (mag > 23)
+            step_counter = step_counter + 1
+        end
+    end
     drawnow
     pause(0.2)
 end
