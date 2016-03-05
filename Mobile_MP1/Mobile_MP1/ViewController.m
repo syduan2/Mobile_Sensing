@@ -27,6 +27,13 @@
 
 @private BOOL light_ready;
 @private BOOL isSleeping;
+    
+@private float direction;
+@private float total_dir;
+@private float rotx_off;
+@private float roty_off;
+@private float rotz_off;
+
 }
 
 - (void)viewDidLoad {
@@ -53,9 +60,18 @@
         }
     }
     prev_x = prev_y = prev_z = 0;
+    
     self.stepsLabel.text = @"0";
+    steps = 0;
+    newsteps = 0;
     
     self.motionTimer = [NSTimer scheduledTimerWithTimeInterval:time_interval target:self selector:@selector(countSteps) userInfo:nil repeats:YES];
+    
+    direction = 0;
+    total_dir = 0;
+    
+    
+    self.dirTimer = [NSTimer scheduledTimerWithTimeInterval:time_interval target:self selector:@selector(updateDir) userInfo:nil repeats:YES];
     
     
     //AVCaptureDevice * camera = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
@@ -78,6 +94,21 @@
     [self.session addOutput:videooutput];
     [self.session addInput:videoinput];
     [self.session startRunning];
+    
+    //SLIDER
+    self.stepLength.minimumValue = 0;
+    self.stepLength.maximumValue = 10;
+    self.stepLength.continuous = false;
+    self.stepLength.value = 5;
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+        //Background Thread
+        dispatch_async(dispatch_get_main_queue(), ^(void){
+            self.stepLengthValLabel.text = [NSString stringWithFormat:@"Step length: %f", self.stepLength.value];
+        });
+    });
+
+    
+    
     
     //[self.motionManager startMagnetometerUpdatesToQueue: [NSOperationQueue currentQueue] withHandler:^(CMMagnetometerData *data, NSError *error) {self.magneticLabel.text = [NSString stringWithFormat:@"%.02f", data.magneticField.x]; }];
 
@@ -160,6 +191,26 @@
     }
     
 }
+
+- (IBAction)reset:(id)sender {
+    self->cur_light= 0;
+    self->prev_x = 0;
+    self->prev_y = 0;
+    self->prev_z = 0;
+    self->newsteps = 0;
+    self->steps = 0;
+    self->time = 0;
+    self->direction = 0;
+    self->total_dir = 0;
+    self.stepLength.value = 5;
+    
+}
+
+
+
+
+
+
 - (void) countSteps {
 dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
     //Background Thread
@@ -173,14 +224,14 @@ dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
         float curr = ABS(sqrt(curr_x * curr_x + curr_y * curr_y + curr_z * curr_z));
         
         float threshold = time_interval * curr + (1.0 - time_interval) * prev;
-        self.pythLabel.text = [NSString stringWithFormat:@"%f", threshold];
+        self.pythLabel.text = [NSString stringWithFormat:@"Threshold: %f", threshold];
         
-        if (threshold <= 0.80) {
+        if (threshold <= 0.70) {
             //isSleeping = YES;
             //[self performSelector:@selector(wakeUp) withObject:nil afterDelay:1.5];
             newsteps = steps + 1;
             //steps++;
-            self.stepsLabel.text = [NSString stringWithFormat:@"%d", newsteps];
+            self.stepsLabel.text = [NSString stringWithFormat:@"Steps taken: %d", newsteps - 1];
         }
         else{
             steps = newsteps;
@@ -189,9 +240,45 @@ dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
         prev_y = curr_y;
         prev_z = curr_z;
         //Run UI Updates
-        self.magneticLabel.text = [NSString stringWithFormat:@"%f", self->cur_light];
+        self.magneticLabel.text = [NSString stringWithFormat:@"Luminosity: %f", self->cur_light];
+        
+        
+        
+        // STEP DISTANCE
+        
+        self.stepLengthValLabel.text = [NSString stringWithFormat:@"Step length: %f", self.stepLength.value];
+        self.totalDistLabel.text = [NSString stringWithFormat:@"Total Distance: %f", self.stepLength.value * (steps - 1)];
+
     });
 });
+}
+
+- (void) updateDir {
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+        //Background Thread
+        dispatch_async(dispatch_get_main_queue(), ^(void){
+            
+            if(ABS(self.motionManager.gyroData.rotationRate.z) < 0.05){
+                
+                rotz_off = (rotz_off + self.motionManager.gyroData.rotationRate.z) / 2;
+            }
+
+            //float rate_x = self.motionManager.gyroData.rotationRate.x - rotx_off;
+            //float rate_y = self.motionManager.gyroData.rotationRate.y - roty_off;
+            float rate_z = (self.motionManager.gyroData.rotationRate.z - rotz_off) / 1.74;
+            
+           
+            direction += rate_z;
+            if(ABS(rate_z) > 0.004){
+                total_dir += ABS(rate_z);
+            }
+            
+            self.dirLabel.text = [NSString stringWithFormat:@"Direction: %f", fmod(direction,360)];
+            
+            self.totalRotLabel.text = [NSString stringWithFormat:@"Total Rotation: %f", total_dir];
+
+        });
+    });
 }
 
 - (void)wakeUp {
